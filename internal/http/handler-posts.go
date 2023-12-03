@@ -6,9 +6,9 @@ import (
 	"github.com/google/uuid"
 	"github.com/gin-gonic/gin"
 
-	"github.com/guisteink/tusk/internal"
+	"github.com/guisteink/tusk/internal/post"
 	"github.com/guisteink/tusk/internal/database"
-	"github.com/guisteink/tusk/internal/http/post"
+	"github.com/guisteink/tusk/internal"
 )
 
 var service post.Service

@@ -4,6 +4,8 @@ import (
 	"log"
 	"os"
 
+	"github.com/gin-gonic/gin"
+
 	"github.com/guisteink/tusk/internal/database"
 	"github.com/guisteink/tusk/internal/http"
 )
@@ -18,8 +20,6 @@ func main() {
 	} else {
 		log.Println("DATABASE_URI:", client)
 	}
-
-	defer conn.Close()
 
 	g := gin.Default()
 	http.Configure()
