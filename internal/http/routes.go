@@ -5,8 +5,5 @@ import (
 )
 
 func SetRoutes(g *gin.Engine) {
-	g.POST("/post", new)
-	// g.DELETE("/post/:id", DeletePosts)
-	// g.GET("/post/:id", GetPosts)
-	// g.UPDATE("/post/:id", UpdatePosts)
+	g.POST("/post", HandleNewPost)
 }
