@@ -3,12 +3,12 @@ package http
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/gin-gonic/gin"
 
 	"github.com/guisteink/tusk/internal"
 	"github.com/guisteink/tusk/internal/database"
-	"github.com/guisteink/tusk/internal/post"
+	"github.com/guisteink/tusk/internal/http/post"
 )
 
 var service post.Service

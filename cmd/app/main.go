@@ -2,8 +2,6 @@ package main
 
 import (
 	"log"
-	// "net/http"
-	// "io"
 	"os"
 
 	"github.com/guisteink/tusk/internal/database"
