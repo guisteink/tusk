@@ -1,13 +1,12 @@
 package http
 
 import (
-	"net/http"
-	"log"
 	"errors"
-
-	"go.mongodb.org/mongo-driver/mongo"
+	"log"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/guisteink/tusk/internal"
 	"github.com/guisteink/tusk/internal/post"
@@ -54,6 +53,6 @@ func HandleNewPost(ctx *gin.Context) {
 		return
 	}
 
-	log.Printf("Post created successfully with ID %s: %+v\n", response.Post.ID, response.Post)
+	log.Printf("Post created successfully: %+v\n", response.Post)
 	ctx.JSON(statusCode, response)
 }

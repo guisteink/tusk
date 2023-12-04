@@ -5,7 +5,6 @@ import (
 )
 
 type Post struct {
-	ID        string    `json:"id"`
 	Username  string    `json:"username"`
 	Title     string    `json:"title"`
 	Body      string    `json:"body"`

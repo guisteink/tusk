@@ -15,21 +15,27 @@ type Repository struct {
 	Conn *mongo.Client
 }
 
-func (r *Repository) Insert(post internal.Post) (string, error) {
+func (r *Repository) Insert(post internal.Post, timeout int) (*internal.Post, error) {
 	collection := r.Conn.Database("tusk").Collection("posts")
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
 	defer cancel()
 
 	result, err := collection.InsertOne(ctx, post)
 	if err != nil {
-		return "", fmt.Errorf("failed to insert post: %v", err)
+		return nil, fmt.Errorf("failed to insert post: %v", err)
 	}
 
 	insertedID, ok := result.InsertedID.(primitive.ObjectID)
 	if !ok {
-		return "", fmt.Errorf("failed to get inserted post ID")
+		return nil, fmt.Errorf("failed to get inserted post ID")
 	}
 
-	return insertedID.Hex(), nil
+	var insertedPost internal.Post
+	err = collection.FindOne(ctx, primitive.M{"_id": insertedID}).Decode(&insertedPost)
+	if err != nil {
+		return nil, fmt.Errorf("failed to retrieve inserted post: %v", err)
+	}
+
+	return &insertedPost, nil
 }

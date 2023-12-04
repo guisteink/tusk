@@ -12,6 +12,8 @@ var ErrPostBodyEmpty = errors.New("post body is empty")
 var ErrPostBodyExceedsLimit = errors.New("post body exceeds limit")
 var ErrPostNotFound = errors.New("post not found")
 
+var MaxTimeout = 10
+
 type Service struct {
 	Repository Repository
 }
@@ -29,7 +31,7 @@ func (p Service) Create(post internal.Post) (CreateResponse, int, error) {
 		return CreateResponse{}, http.StatusBadRequest, ErrPostBodyExceedsLimit
 	}
 
-	postID, err := p.Repository.Insert(post)
+	result, err := p.Repository.Insert(post, MaxTimeout)
 	if err != nil {
 		if errors.Is(err, ErrPostNotFound) {
 			return CreateResponse{}, http.StatusNotFound, err
@@ -38,12 +40,11 @@ func (p Service) Create(post internal.Post) (CreateResponse, int, error) {
 	}
 
 	createdPost := internal.Post{
-		ID:        postID,
-		Username:  post.Username,
-		Title:     post.Title,
-		Body:      post.Body,
-		CreatedAt: post.CreatedAt,
-		Tags:      post.Tags,
+		Username:  result.Username,
+		Title:     result.Title,
+		Body:      result.Body,
+		CreatedAt: result.CreatedAt,
+		Tags:      result.Tags,
 	}
 
 	response := CreateResponse{Post: createdPost}
