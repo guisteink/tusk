@@ -23,12 +23,10 @@ func main() {
 		panic(err)
 	}
 
-	// Pass the MongoDB client to the http.Configure function
 	http.Configure(conn)
 
 	g := gin.Default()
 	http.SetRoutes(g)
 
 	g.Run(":" + connectionPort)
-
 }

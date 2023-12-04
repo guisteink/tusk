@@ -1,7 +1,6 @@
 package post
 
 import (
-	"fmt"
 	"errors"
 	"unicode/utf8"
 
@@ -17,8 +16,6 @@ type Service struct {
 }
 
 func (p Service) Create(post internal.Post) error {
-	fmt.Printf("\n\n[service create] = %+v\n", post, "\n\n")
-
 	if post.Body == "" {
 		return ErrPostBodyEmpty
 	}
