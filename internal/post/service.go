@@ -3,6 +3,9 @@ package post
 import (
 	"errors"
 	"unicode/utf8"
+	"net/http"
+
+	"github.com/google/uuid"
 
 	"github.com/guisteink/tusk/internal"
 )
@@ -15,14 +18,41 @@ type Service struct {
 	Repository Repository
 }
 
-func (p Service) Create(post internal.Post) error {
+type CreateResponse struct {
+	Post internal.Post `json:"post"`
+}
+
+func (p Service) Create(post internal.Post) (CreateResponse, int, error) {
 	if post.Body == "" {
-		return ErrPostBodyEmpty
+		return CreateResponse{}, http.StatusBadRequest, ErrPostBodyEmpty
 	}
 
 	if utf8.RuneCountInString(post.Body) > 140 {
-		return ErrPostBodyExceedsLimit
+		return CreateResponse{}, http.StatusBadRequest, ErrPostBodyExceedsLimit
 	}
 
-	return p.Repository.Insert(post)
+	postID, err := p.Repository.Insert(post)
+	if err != nil {
+		if errors.Is(err, ErrPostNotFound) {
+			return CreateResponse{}, http.StatusNotFound, err
+		}
+		return CreateResponse{}, http.StatusInternalServerError, err
+	}
+
+	id, err := uuid.Parse(postID)
+	if err != nil {
+		return CreateResponse{}, http.StatusInternalServerError, err
+	}
+
+	createdPost := internal.Post{
+		ID:        id,
+		Username:  post.Username,
+		Title:     post.Title,
+		Body:      post.Body,
+		CreatedAt: post.CreatedAt,
+		Tags:      post.Tags,
+	}
+
+	response := CreateResponse{Post: createdPost}
+	return response, http.StatusCreated, nil
 }

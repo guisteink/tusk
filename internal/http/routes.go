@@ -1,13 +1,16 @@
 package http
 
 import (
-	"log"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
+func NotFoundHandler(ctx *gin.Context) {
+	ctx.JSON(http.StatusNotFound, gin.H{"error": "Route not found"})
+}
 
 func SetRoutes(g *gin.Engine) {
-	log.Println("Setting routes")
 	g.POST("/post", HandleNewPost)
+	g.NoRoute(NotFoundHandler)
 }

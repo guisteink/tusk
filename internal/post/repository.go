@@ -14,7 +14,7 @@ type Repository struct {
 	Conn *mongo.Client
 }
 
-func (r *Repository) Insert(post internal.Post) error {
+func (r *Repository) Insert(post internal.Post) (string, error) {
 	collection := r.Conn.Database("tusk").Collection("posts")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -22,8 +22,8 @@ func (r *Repository) Insert(post internal.Post) error {
 
 	_, err := collection.InsertOne(ctx, post)
 	if err != nil {
-		return fmt.Errorf("failed to insert post: %v", err)
+		return "", fmt.Errorf("failed to insert post: %v", err)
 	}
 
-	return nil
+	return post.ID.String(), nil
 }
