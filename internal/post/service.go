@@ -2,10 +2,8 @@ package post
 
 import (
 	"errors"
-	"unicode/utf8"
 	"net/http"
-
-	"github.com/google/uuid"
+	"unicode/utf8"
 
 	"github.com/guisteink/tusk/internal"
 )
@@ -39,13 +37,8 @@ func (p Service) Create(post internal.Post) (CreateResponse, int, error) {
 		return CreateResponse{}, http.StatusInternalServerError, err
 	}
 
-	id, err := uuid.Parse(postID)
-	if err != nil {
-		return CreateResponse{}, http.StatusInternalServerError, err
-	}
-
 	createdPost := internal.Post{
-		ID:        id,
+		ID:        postID,
 		Username:  post.Username,
 		Title:     post.Title,
 		Body:      post.Body,
