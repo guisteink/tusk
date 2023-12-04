@@ -5,27 +5,25 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/jackc/pgx/v4/pgxpool"
+	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/guisteink/tusk/internal"
 )
 
 type Repository struct {
-	Conn *pgxpool.Pool
+	Conn *mongo.Client
 }
 
 func (r *Repository) Insert(post internal.Post) error {
+	collection := r.Conn.Database("tusk").Collection("posts")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	fmt.Println(r.Conn)
+	_, err := collection.InsertOne(ctx, post)
+	if err != nil {
+		return fmt.Errorf("failed to insert post: %v", err)
+	}
 
-	_, err := r.Conn.Exec(
-		ctx,
-		"INSERT INTO posts (username, body) VALUES ($1, $2)",
-		post.Username,
-		post.Body)
-
-	return err
+	return nil
 }

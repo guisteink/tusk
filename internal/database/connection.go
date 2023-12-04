@@ -4,14 +4,14 @@ import (
 	"context"
 	"time"
 	"log"
+	"errors"
+	"fmt"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-
-	"github.com/jackc/pgx/v4/pgxpool"
 )
 
-var Conn *pgxpool.Pool
+var Conn *mongo.Client
 
 func NewConnection(connectionString string) (*mongo.Client, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
@@ -21,14 +21,18 @@ func NewConnection(connectionString string) (*mongo.Client, error) {
 
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
-		return nil, err
+			return nil, err
 	}
 
-	err = client.Ping(ctx, nil)
-	if err != nil {
-		return nil, err
+	if err := client.Ping(ctx, nil); err != nil {
+			return nil, err
 	}
 
-	log.Println("Connected to MongoDB!")
+	if ctx.Err() == context.DeadlineExceeded {
+			return nil, errors.New("context deadline exceeded")
+	}
+
+	log.Println(fmt.Sprintf("Connected to MongoDB! %v", client))
+
 	return client, nil
 }

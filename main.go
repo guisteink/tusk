@@ -10,19 +10,25 @@ import (
 	"github.com/guisteink/tusk/internal/http"
 )
 
+
 func main() {
 	connectionString := os.Getenv("DATABASE_URI")
-	log.Println("DATABASE_URI:", connectionString)
+	connectionPort := os.Getenv("PORT")
 
-	client, err := database.NewConnection(connectionString)
-	if err != nil {
-		log.Fatal(err)
-	} else {
-		log.Println("DATABASE_URI:", client)
+	conn, err := database.NewConnection(connectionString)
+	if conn == nil {
+		log.Println("Database connection is nil.")
+		os.Exit(1)
+	} else if err != nil {
+		panic(err)
 	}
 
+	// Pass the MongoDB client to the http.Configure function
+	http.Configure(conn)
+
 	g := gin.Default()
-	http.Configure()
 	http.SetRoutes(g)
-	g.Run(":3000")
+
+	g.Run(":" + connectionPort)
+
 }
