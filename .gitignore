@@ -1,0 +1,28 @@
+# Logs
+logs
+*.log
+
+# Compiled binary addons (http://nodejs.org/api/addons.html)
+build/Release
+dist
+
+# Dependency directory
+# https://docs.npmjs.com/cli/shrinkwrap#caveats
+node_modules
+package-lock
+
+# Debug log from npm
+npm-debug.log
+
+# VS Code files
+.vscode
+
+# Keys
+*.key
+*.pem
+
+# Temporary files
+*.tmp
+
+# Var environments
+.env
