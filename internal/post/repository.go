@@ -39,3 +39,29 @@ func (r *Repository) Insert(post internal.Post, timeout int) (*internal.Post, er
 
 	return &insertedPost, nil
 }
+
+func (r *Repository) Find(filter interface{}) ([]internal.Post, error) {
+	ctx := context.Background()
+	collection := r.Conn.Database("tusk").Collection("posts")
+
+	var posts []internal.Post
+	cur, err := collection.Find(ctx, filter)
+	if err != nil {
+		return nil, fmt.Errorf("failed to find posts: %v", err)
+	}
+	defer cur.Close(ctx)
+
+	for cur.Next(ctx) {
+		var post internal.Post
+		if err := cur.Decode(&post); err != nil {
+			return nil, fmt.Errorf("failed to decode post: %v", err)
+		}
+		posts = append(posts, post)
+	}
+
+	if err := cur.Err(); err != nil {
+		return nil, fmt.Errorf("cursor error: %v", err)
+	}
+
+	return posts, nil
+}

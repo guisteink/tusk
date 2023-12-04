@@ -56,3 +56,35 @@ func HandleNewPost(ctx *gin.Context) {
 	log.Printf("Post created successfully: %+v\n", response.Post)
 	ctx.JSON(statusCode, response)
 }
+
+func handleListPostById(ctx *gin.Context) {
+	param := ctx.Param("id")
+
+	if param == "" {
+		ctx.JSON(http.StatusNotFound, gin.H{
+			"error": post.ErrIdEmpty,
+		})
+	}
+
+	log.Printf("Searching for post with id: %s\n", param)
+	response, statusCode, err := service.FindByID(param)
+	if err != nil {
+		handleErrors(ctx, err)
+		return
+	}
+
+	log.Printf("Found post with id %s: %+v\n", param, response)
+	ctx.JSON(statusCode, response)
+}
+
+func handleListPosts(ctx *gin.Context) {
+	log.Printf("Listing all posts")
+	response, statusCode, err := service.FindAll()
+	if err != nil {
+		handleErrors(ctx, err)
+		return
+	}
+
+	log.Printf("Founded posts: %+v\n", response)
+	ctx.JSON(statusCode, response)
+}

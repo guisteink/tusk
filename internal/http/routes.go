@@ -11,6 +11,8 @@ func NotFoundHandler(ctx *gin.Context) {
 }
 
 func SetRoutes(g *gin.Engine) {
-	g.POST("/post", HandleNewPost)
+	g.POST("/posts", HandleNewPost)
+	g.GET("/posts/:id", handleListPostById)
+	g.GET("/posts", handleListPosts)
 	g.NoRoute(NotFoundHandler)
 }
