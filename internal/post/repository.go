@@ -65,3 +65,16 @@ func (r *Repository) Find(filter interface{}) ([]internal.Post, error) {
 
 	return posts, nil
 }
+
+func (r *Repository) Delete(id primitive.ObjectID) (internal.Post, error) {
+	ctx := context.Background()
+	collection := r.Conn.Database("tusk").Collection("posts")
+
+	var deletedPost internal.Post
+	err := collection.FindOneAndDelete(ctx, primitive.M{"_id": id}).Decode(&deletedPost)
+	if err != nil {
+		return internal.Post{}, fmt.Errorf("failed to delete post: %v", err)
+	}
+
+	return deletedPost, nil
+}

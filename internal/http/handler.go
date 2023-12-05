@@ -88,3 +88,24 @@ func handleListPosts(ctx *gin.Context) {
 	log.Printf("Founded posts: %+v\n", response)
 	ctx.JSON(statusCode, response)
 }
+
+func handleDeletePost(ctx *gin.Context) {
+	param := ctx.Param("id")
+
+	if param == "" {
+		ctx.JSON(http.StatusNotFound, gin.H{
+			"error": post.ErrIdEmpty,
+		})
+	}
+
+	log.Printf("Trying to delete post with id: %s\n", param)
+	response, statusCode, err := service.DeleteByID(param)
+	if err != nil {
+		handleErrors(ctx, err)
+		return
+	}
+
+	log.Printf("Deleted post with id %s: %+v\n", param, response)
+	log.Printf("Post with id %s successfully deleted: %+v\n", param, response)
+	ctx.JSON(statusCode, response)
+}

@@ -97,3 +97,24 @@ func (s Service) FindAll() ([]internal.Post, int, error) {
 
 	return posts, http.StatusOK, nil
 }
+
+func (s Service) DeleteByID(param string) (internal.Post, int, error) {
+	if param == "" {
+		return internal.Post{}, http.StatusBadRequest, ErrIdEmpty
+	}
+
+	id, err := primitive.ObjectIDFromHex(param)
+	if err != nil {
+		return internal.Post{}, http.StatusBadRequest, fmt.Errorf("invalid id format: %v", err)
+	}
+
+	deletedPost, err := s.Repository.Delete(id)
+	if err != nil {
+		if errors.Is(err, ErrPostNotFound) {
+			return internal.Post{}, http.StatusNotFound, err
+		}
+		return deletedPost, http.StatusInternalServerError, err
+	}
+
+	return deletedPost, http.StatusOK, nil
+}

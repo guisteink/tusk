@@ -14,5 +14,6 @@ func SetRoutes(g *gin.Engine) {
 	g.POST("/posts", HandleNewPost)
 	g.GET("/posts/:id", handleListPostById)
 	g.GET("/posts", handleListPosts)
+	g.DELETE("/posts/:id", handleDeletePost)
 	g.NoRoute(NotFoundHandler)
 }
