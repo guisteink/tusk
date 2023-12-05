@@ -2,10 +2,10 @@ package http
 
 import (
 	"errors"
-	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/mongo"
 
 	"github.com/guisteink/tusk/internal"
@@ -13,8 +13,20 @@ import (
 )
 
 var service post.Service
+var logger = logrus.New()
+
+const (
+	statusBadRequest          = http.StatusBadRequest
+	statusNotFound            = http.StatusNotFound
+	statusInternalServerError = http.StatusInternalServerError
+)
+
+func initLogger() {
+	logger.SetFormatter(&logrus.JSONFormatter{})
+}
 
 func Configure(conn *mongo.Client) {
+	initLogger()
 	service = post.Service{
 		Repository: post.Repository{
 			Conn: conn,
@@ -22,20 +34,20 @@ func Configure(conn *mongo.Client) {
 	}
 }
 func handleError(ctx *gin.Context, statusCode int, message string, err error) {
-	log.Printf("Error: %v", err)
+	logger.WithError(err).Error(message)
 	ctx.JSON(statusCode, gin.H{"error": message})
 }
 
 func handleErrors(ctx *gin.Context, err error) {
 	switch {
 	case errors.Is(err, post.ErrPostBodyEmpty):
-		handleError(ctx, http.StatusBadRequest, "Post body is empty", err)
+		handleError(ctx, statusBadRequest, "Post body is empty", err)
 	case errors.Is(err, post.ErrPostBodyExceedsLimit):
-		handleError(ctx, http.StatusBadRequest, "Post body exceeds limit", err)
+		handleError(ctx, statusBadRequest, "Post body exceeds limit", err)
 	case errors.Is(err, post.ErrPostNotFound):
-		handleError(ctx, http.StatusNotFound, "Post not found", err)
+		handleError(ctx, statusNotFound, "Post not found", err)
 	default:
-		handleError(ctx, http.StatusInternalServerError, "Internal Server Error", err)
+		handleError(ctx, statusInternalServerError, "Internal Server Error", err)
 	}
 }
 
@@ -46,66 +58,85 @@ func HandleNewPost(ctx *gin.Context) {
 		return
 	}
 
-	log.Printf("Creating post: %+v\n", post)
+	logger.Infof("Creating post: %+v\n", post)
 	response, statusCode, err := service.Create(post)
 	if err != nil {
 		handleErrors(ctx, err)
 		return
 	}
 
-	log.Printf("Post created successfully: %+v\n", response.Post)
+	logger.Infof("Post created successfully: %+v\n", response.Post)
 	ctx.JSON(statusCode, response)
 }
 
 func handleListPostById(ctx *gin.Context) {
 	param := ctx.Param("id")
-
 	if param == "" {
-		ctx.JSON(http.StatusNotFound, gin.H{
-			"error": post.ErrIdEmpty,
-		})
+		handleErrors(ctx, post.ErrIdEmpty)
+		return
 	}
 
-	log.Printf("Searching for post with id: %s\n", param)
+	logger.Infof("Searching for post with id: %s\n", param)
 	response, statusCode, err := service.FindByID(param)
 	if err != nil {
 		handleErrors(ctx, err)
 		return
 	}
 
-	log.Printf("Found post with id %s: %+v\n", param, response)
+	logger.Infof("Found post with id %s: %+v\n", param, response)
 	ctx.JSON(statusCode, response)
 }
 
 func handleListPosts(ctx *gin.Context) {
-	log.Printf("Listing all posts")
+	logger.Info("Listing all posts")
 	response, statusCode, err := service.FindAll()
 	if err != nil {
 		handleErrors(ctx, err)
 		return
 	}
 
-	log.Printf("Founded posts: %+v\n", response)
+	logger.Infof("Founded posts: %+v\n", response)
 	ctx.JSON(statusCode, response)
 }
 
 func handleDeletePost(ctx *gin.Context) {
 	param := ctx.Param("id")
-
 	if param == "" {
-		ctx.JSON(http.StatusNotFound, gin.H{
-			"error": post.ErrIdEmpty,
-		})
+		handleErrors(ctx, post.ErrIdEmpty)
+		return
 	}
 
-	log.Printf("Trying to delete post with id: %s\n", param)
+	logger.Infof("Trying to delete post with id: %s\n", param)
 	response, statusCode, err := service.DeleteByID(param)
 	if err != nil {
 		handleErrors(ctx, err)
 		return
 	}
 
-	log.Printf("Deleted post with id %s: %+v\n", param, response)
-	log.Printf("Post with id %s successfully deleted: %+v\n", param, response)
+	logger.Infof("Post with id %s successfully deleted: %+v\n", param, response)
+	ctx.JSON(statusCode, response)
+}
+
+func handleUpdatePost(ctx *gin.Context) {
+	param := ctx.Param("id")
+	if param == "" {
+		handleErrors(ctx, post.ErrIdEmpty)
+		return
+	}
+
+	var post internal.Post
+	if err := ctx.BindJSON(&post); err != nil {
+		handleErrors(ctx, err)
+		return
+	}
+
+	logger.Infof("Trying to update post with id: %s\n", param)
+	response, statusCode, err := service.UpdateByID(param, post)
+	if err != nil {
+		handleErrors(ctx, err)
+		return
+	}
+
+	logger.Infof("Post updated successfully: %+v\n", response.Post)
 	ctx.JSON(statusCode, response)
 }

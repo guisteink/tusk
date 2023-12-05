@@ -17,7 +17,7 @@ var ErrPostBodyExceedsLimit = errors.New("post body exceeds limit")
 var ErrPostNotFound = errors.New("post not found")
 var ErrIdEmpty = errors.New("id empty")
 
-var MaxTimeout = 10
+var MaxCharactersPerPost = 2000
 
 type Service struct {
 	Repository Repository
@@ -32,11 +32,11 @@ func (p Service) Create(post internal.Post) (CreateResponse, int, error) {
 		return CreateResponse{}, http.StatusBadRequest, ErrPostBodyEmpty
 	}
 
-	if utf8.RuneCountInString(post.Body) > 140 {
+	if utf8.RuneCountInString(post.Body) > MaxCharactersPerPost {
 		return CreateResponse{}, http.StatusBadRequest, ErrPostBodyExceedsLimit
 	}
 
-	result, err := p.Repository.Insert(post, MaxTimeout)
+	result, err := p.Repository.Insert(post)
 	if err != nil {
 		if errors.Is(err, ErrPostNotFound) {
 			return CreateResponse{}, http.StatusNotFound, err
@@ -98,23 +98,61 @@ func (s Service) FindAll() ([]internal.Post, int, error) {
 	return posts, http.StatusOK, nil
 }
 
-func (s Service) DeleteByID(param string) (internal.Post, int, error) {
+func (s Service) DeleteByID(param string) (CreateResponse, int, error) {
 	if param == "" {
-		return internal.Post{}, http.StatusBadRequest, ErrIdEmpty
+		return CreateResponse{}, http.StatusBadRequest, ErrIdEmpty
 	}
 
 	id, err := primitive.ObjectIDFromHex(param)
 	if err != nil {
-		return internal.Post{}, http.StatusBadRequest, fmt.Errorf("invalid id format: %v", err)
+		return CreateResponse{}, http.StatusBadRequest, fmt.Errorf("invalid id format: %v", err)
 	}
 
 	deletedPost, err := s.Repository.Delete(id)
 	if err != nil {
 		if errors.Is(err, ErrPostNotFound) {
-			return internal.Post{}, http.StatusNotFound, err
+			return CreateResponse{}, http.StatusNotFound, err
 		}
-		return deletedPost, http.StatusInternalServerError, err
+		return CreateResponse{}, http.StatusInternalServerError, err
 	}
 
-	return deletedPost, http.StatusOK, nil
+	response := CreateResponse{Post: deletedPost}
+	return response, http.StatusOK, nil
+}
+func (s Service) UpdateByID(param string, updatedPost internal.Post) (CreateResponse, int, error) {
+	if updatedPost.Body == "" {
+		return CreateResponse{}, http.StatusBadRequest, ErrPostBodyEmpty
+	}
+
+	if utf8.RuneCountInString(updatedPost.Body) > MaxCharactersPerPost {
+		return CreateResponse{}, http.StatusBadRequest, ErrPostBodyExceedsLimit
+	}
+
+	if param == "" {
+		return CreateResponse{}, http.StatusBadRequest, ErrIdEmpty
+	}
+
+	id, err := primitive.ObjectIDFromHex(param)
+	if err != nil {
+		return CreateResponse{}, http.StatusBadRequest, fmt.Errorf("invalid id format: %v", err)
+	}
+
+	result, err := s.Repository.Update(id, updatedPost)
+	if err != nil {
+		if errors.Is(err, ErrPostNotFound) {
+			return CreateResponse{}, http.StatusNotFound, err
+		}
+		return CreateResponse{}, http.StatusInternalServerError, err
+	}
+
+	responsePost := internal.Post{
+		Username:  result.Username,
+		Title:     result.Title,
+		Body:      result.Body,
+		CreatedAt: result.CreatedAt,
+		Tags:      result.Tags,
+	}
+
+	response := CreateResponse{Post: responsePost}
+	return response, http.StatusOK, nil
 }

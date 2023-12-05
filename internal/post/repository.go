@@ -3,8 +3,8 @@ package post
 import (
 	"context"
 	"fmt"
-	"time"
 
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
@@ -15,11 +15,9 @@ type Repository struct {
 	Conn *mongo.Client
 }
 
-func (r *Repository) Insert(post internal.Post, timeout int) (*internal.Post, error) {
+func (r *Repository) Insert(post internal.Post) (*internal.Post, error) {
+	ctx := context.Background()
 	collection := r.Conn.Database("tusk").Collection("posts")
-
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
-	defer cancel()
 
 	result, err := collection.InsertOne(ctx, post)
 	if err != nil {
@@ -77,4 +75,33 @@ func (r *Repository) Delete(id primitive.ObjectID) (internal.Post, error) {
 	}
 
 	return deletedPost, nil
+}
+
+func (r *Repository) Update(id primitive.ObjectID, updatedPost internal.Post) (internal.Post, error) {
+	ctx := context.Background()
+	collection := r.Conn.Database("tusk").Collection("posts")
+
+	update := bson.M{
+		"$set": bson.M{
+			"username":  updatedPost.Username,
+			"title":     updatedPost.Title,
+			"body":      updatedPost.Body,
+			"createdAt": updatedPost.CreatedAt,
+			"tags":      updatedPost.Tags,
+		},
+	}
+
+	_, err := collection.UpdateOne(ctx, primitive.M{"_id": id}, update)
+	if err != nil {
+		return internal.Post{}, fmt.Errorf("failed to update post: %v", err)
+	}
+
+	// Retrieve the updated post
+	var updated internal.Post
+	err = collection.FindOne(ctx, primitive.M{"_id": id}).Decode(&updated)
+	if err != nil {
+		return internal.Post{}, fmt.Errorf("failed to retrieve updated post: %v", err)
+	}
+
+	return updated, nil
 }
