@@ -46,6 +46,7 @@ func (p Service) Create(post internal.Post, ctx *gin.Context) (CreateResponse, i
 	}
 
 	createdPost := internal.Post{
+		ID:        result.ID,
 		Username:  result.Username,
 		Title:     result.Title,
 		Body:      result.Body,
