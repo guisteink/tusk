@@ -1,9 +1,9 @@
 package post
 
 import (
-	"context"
 	"fmt"
 
+	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -15,8 +15,7 @@ type Repository struct {
 	Conn *mongo.Client
 }
 
-func (r *Repository) Insert(post internal.Post) (*internal.Post, error) {
-	ctx := context.Background()
+func (r *Repository) Insert(post internal.Post, ctx *gin.Context) (*internal.Post, error) {
 	collection := r.Conn.Database("tusk").Collection("posts")
 
 	result, err := collection.InsertOne(ctx, post)
@@ -38,8 +37,7 @@ func (r *Repository) Insert(post internal.Post) (*internal.Post, error) {
 	return &insertedPost, nil
 }
 
-func (r *Repository) Find(filter interface{}) ([]internal.Post, error) {
-	ctx := context.Background()
+func (r *Repository) Find(filter interface{}, ctx *gin.Context) ([]internal.Post, error) {
 	collection := r.Conn.Database("tusk").Collection("posts")
 
 	var posts []internal.Post
@@ -64,8 +62,7 @@ func (r *Repository) Find(filter interface{}) ([]internal.Post, error) {
 	return posts, nil
 }
 
-func (r *Repository) Delete(id primitive.ObjectID) (internal.Post, error) {
-	ctx := context.Background()
+func (r *Repository) Delete(id primitive.ObjectID, ctx *gin.Context) (internal.Post, error) {
 	collection := r.Conn.Database("tusk").Collection("posts")
 
 	var deletedPost internal.Post
@@ -77,8 +74,7 @@ func (r *Repository) Delete(id primitive.ObjectID) (internal.Post, error) {
 	return deletedPost, nil
 }
 
-func (r *Repository) Update(id primitive.ObjectID, updatedPost internal.Post) (internal.Post, error) {
-	ctx := context.Background()
+func (r *Repository) Update(id primitive.ObjectID, updatedPost internal.Post, ctx *gin.Context) (internal.Post, error) {
 	collection := r.Conn.Database("tusk").Collection("posts")
 
 	update := bson.M{

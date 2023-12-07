@@ -59,7 +59,7 @@ func HandleNewPost(ctx *gin.Context) {
 	}
 
 	logger.Infof("Creating post: %+v\n", post)
-	response, statusCode, err := service.Create(post)
+	response, statusCode, err := service.Create(post, ctx)
 	if err != nil {
 		handleErrors(ctx, err)
 		return
@@ -77,7 +77,7 @@ func handleListPostById(ctx *gin.Context) {
 	}
 
 	logger.Infof("Searching for post with id: %s\n", param)
-	response, statusCode, err := service.FindByID(param)
+	response, statusCode, err := service.FindByID(param, ctx)
 	if err != nil {
 		handleErrors(ctx, err)
 		return
@@ -89,7 +89,7 @@ func handleListPostById(ctx *gin.Context) {
 
 func handleListPosts(ctx *gin.Context) {
 	logger.Info("Listing all posts")
-	response, statusCode, err := service.FindAll()
+	response, statusCode, err := service.FindAll(ctx)
 	if err != nil {
 		handleErrors(ctx, err)
 		return
@@ -107,7 +107,7 @@ func handleDeletePost(ctx *gin.Context) {
 	}
 
 	logger.Infof("Trying to delete post with id: %s\n", param)
-	response, statusCode, err := service.DeleteByID(param)
+	response, statusCode, err := service.DeleteByID(param, ctx)
 	if err != nil {
 		handleErrors(ctx, err)
 		return
@@ -131,7 +131,7 @@ func handleUpdatePost(ctx *gin.Context) {
 	}
 
 	logger.Infof("Trying to update post with id: %s\n", param)
-	response, statusCode, err := service.UpdateByID(param, post)
+	response, statusCode, err := service.UpdateByID(param, post, ctx)
 	if err != nil {
 		handleErrors(ctx, err)
 		return

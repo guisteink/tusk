@@ -10,7 +10,6 @@ import (
 	"github.com/guisteink/tusk/internal/http"
 )
 
-
 func main() {
 	connectionString := os.Getenv("DATABASE_URI")
 	connectionPort := os.Getenv("PORT")
@@ -20,6 +19,7 @@ func main() {
 		log.Println("Database connection is nil.")
 		os.Exit(1)
 	} else if err != nil {
+		log.Fatal("Failed to establish database connection:", err)
 		panic(err)
 	}
 
