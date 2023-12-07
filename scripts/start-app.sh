@@ -1,1 +1,8 @@
-DATABASE_URI="mongodb+srv://admin:qwe123@4uth.9fbuvlh.mongodb.net/tusk" PORT=3000 go run -gcflags "all=-N -l" ../cmd/app/main.go
+#!/bin/bash
+
+CURRENT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PARENT_DIR="$(dirname "$CURRENT_DIR")"
+
+source "${PARENT_DIR}/.env"
+
+DATABASE_URI="${DATABASE_URI}" PORT="${PORT}" go run -gcflags "all=-N -l" "${CURRENT_DIR}/../cmd/app/main.go"
