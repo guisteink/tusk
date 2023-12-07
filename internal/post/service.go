@@ -18,7 +18,7 @@ var ErrPostBodyExceedsLimit = errors.New("post body exceeds limit")
 var ErrPostNotFound = errors.New("post not found")
 var ErrIdEmpty = errors.New("id empty")
 
-var MaxCharactersPerPost = 2000
+var MaxCharactersPerPost = 20000
 
 type Service struct {
 	Repository Repository
