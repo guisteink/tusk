@@ -1,0 +1,5 @@
+runtime: go116  # Versão do Go
+
+handlers:
+- url: /.*
+  script: auto  # Executa o script padrão do Go
