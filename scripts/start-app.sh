@@ -5,4 +5,4 @@ PARENT_DIR="$(dirname "$CURRENT_DIR")"
 
 source "${PARENT_DIR}/.env"
 
-DATABASE_URI="${DATABASE_URI}" PORT="${PORT}" go run -gcflags "all=-N -l" "${CURRENT_DIR}/../cmd/app/main.go"
+DATABASE_URI="${DATABASE_URI}" PORT="${PORT}" go run -gcflags "all=-N -l" "${CURRENT_DIR}/../main.go"

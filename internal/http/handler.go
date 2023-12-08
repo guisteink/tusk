@@ -38,6 +38,13 @@ func handleError(ctx *gin.Context, statusCode int, message string, err error) {
 	ctx.JSON(statusCode, gin.H{"error": message})
 }
 
+func handleHealthCheck(ctx *gin.Context) {
+	ctx.JSON(http.StatusOK, gin.H{
+		"status":  "ok",
+		"message": "Health check passed",
+	})
+}
+
 func handleErrors(ctx *gin.Context, err error) {
 	switch {
 	case errors.Is(err, post.ErrPostBodyEmpty):

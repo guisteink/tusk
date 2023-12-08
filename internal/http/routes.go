@@ -11,6 +11,7 @@ func NotFoundHandler(ctx *gin.Context) {
 }
 
 func SetRoutes(g *gin.Engine) {
+	g.GET("/", handleHealthCheck)
 	g.POST("/posts", HandleNewPost)
 	g.GET("/posts/:id", handleListPostById)
 	g.GET("/posts", handleListPosts)
