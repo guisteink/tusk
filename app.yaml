@@ -1,4 +1,4 @@
-runtime: go116  # Versão do Go
+runtime: go118  # Versão do Go
 
 handlers:
 - url: /.*
