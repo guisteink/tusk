@@ -1,5 +1,6 @@
-runtime: go118  # Versão do Go
-
+runtime: go
+api_version: go1
+env: flex
 handlers:
 - url: /.*
-  script: auto  # Executa o script padrão do Go
+  script: _go_app
