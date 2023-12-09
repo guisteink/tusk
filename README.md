@@ -1,4 +1,6 @@
-# Como rodar o projeto
+# tusk
+
+## Como rodar o projeto
 
 Requisitos
 Certifique-se de ter o Docker instalado no seu sistema antes de seguir as instruções abaixo.
@@ -29,3 +31,36 @@ Agora, você deve ser capaz de acessar o aplicativo no seu navegador em http://l
 
 #### Observações
 Consulte o arquivo ```.env.example``` para fornecer as variáveis de ambiente necessárias.
+
+## Rotas
+- health check
+```
+curl -i -X GET http://localhost:3000
+```
+- get all posts
+```
+curl -i -X GET http://localhost:3000/posts
+```
+- new post
+```
+curl -i -X POST -H "Content-Type: application/json" -d '{
+    "username": "Guilherme",
+    "title": "Lorem Ipsum",
+    "body": "Test",
+    "tags": ["test"]
+}' http://localhost:3000/posts
+```
+- delete post
+```
+curl -i -X DELETE http://localhost:3000/posts/{id}
+```
+- get post
+```
+curl -i -X GET http://localhost:3000/posts/{id}
+```
+- update post
+```
+curl -i -X PATCH -H "Content-Type: application/json" -d '{
+    "title": "Updated Title"
+}' http://localhost:3000/posts/{id}
+```
