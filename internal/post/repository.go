@@ -61,13 +61,15 @@ func (r *Repository) Find(filter interface{}, ctx *gin.Context) ([]internal.Post
 
 	return posts, nil
 }
-
 func (r *Repository) Delete(id primitive.ObjectID, ctx *gin.Context) (internal.Post, error) {
 	collection := r.Conn.Database("tusk").Collection("posts")
 
 	var deletedPost internal.Post
 	err := collection.FindOneAndDelete(ctx, primitive.M{"_id": id}).Decode(&deletedPost)
 	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return internal.Post{}, ErrPostNotFound
+		}
 		return internal.Post{}, fmt.Errorf("failed to delete post: %v", err)
 	}
 

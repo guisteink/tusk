@@ -33,6 +33,7 @@ func Configure(conn *mongo.Client) {
 		},
 	}
 }
+
 func handleError(ctx *gin.Context, statusCode int, message string, err error) {
 	logger.WithError(err).Error(message)
 	ctx.JSON(statusCode, gin.H{"error": message})

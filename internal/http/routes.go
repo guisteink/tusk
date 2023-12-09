@@ -11,11 +11,14 @@ func NotFoundHandler(ctx *gin.Context) {
 }
 
 func SetRoutes(g *gin.Engine) {
-	g.GET("/", handleHealthCheck)
-	g.POST("/posts", HandleNewPost)
-	g.GET("/posts/:id", handleListPostById)
-	g.GET("/posts", handleListPosts)
-	g.DELETE("/posts/:id", handleDeletePost)
-	g.PATCH("/posts/:id", handleUpdatePost)
+	v1 := g.Group("/v1")
+
+	v1.GET("/", handleHealthCheck)
+	v1.POST("/posts", HandleNewPost)
+	v1.GET("/posts/:id", handleListPostById)
+	v1.GET("/posts", handleListPosts)
+	v1.DELETE("/posts/:id", handleDeletePost)
+	v1.PATCH("/posts/:id", handleUpdatePost)
+
 	g.NoRoute(NotFoundHandler)
 }

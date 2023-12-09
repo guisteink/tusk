@@ -121,6 +121,7 @@ func (s Service) DeleteByID(param string, ctx *gin.Context) (CreateResponse, int
 	response := CreateResponse{Post: deletedPost}
 	return response, http.StatusOK, nil
 }
+
 func (s Service) UpdateByID(param string, updatedPost internal.Post, ctx *gin.Context) (CreateResponse, int, error) {
 	if updatedPost.Body == "" {
 		return CreateResponse{}, http.StatusBadRequest, ErrPostBodyEmpty
