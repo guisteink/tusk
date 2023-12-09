@@ -1,18 +1,23 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"os"
 
 	"github.com/gin-gonic/gin"
 
+	"github.com/guisteink/tusk/config"
 	"github.com/guisteink/tusk/internal/database"
 	"github.com/guisteink/tusk/internal/http"
 )
 
 func main() {
-	connectionString := os.Getenv("DATABASE_URI")
-	connectionPort := os.Getenv("PORT")
+	mongoHost := config.MONGODB_HOST
+	mongoDatabase := config.MONGODB_DATABASE
+	port := config.API_PORT
+
+	connectionString := fmt.Sprintf("%s/%s", mongoHost, mongoDatabase)
 
 	conn, err := database.NewConnection(connectionString)
 	if conn == nil {
@@ -28,5 +33,5 @@ func main() {
 	g := gin.Default()
 	http.SetRoutes(g)
 
-	g.Run(":" + connectionPort)
+	g.Run(":" + port)
 }

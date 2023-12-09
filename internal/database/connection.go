@@ -2,10 +2,10 @@ package database
 
 import (
 	"context"
-	"time"
-	"log"
 	"errors"
 	"fmt"
+	"log"
+	"time"
 
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -21,18 +21,18 @@ func NewConnection(connectionString string) (*mongo.Client, error) {
 
 	client, err := mongo.Connect(ctx, clientOptions)
 	if err != nil {
-			return nil, err
+		return nil, err
 	}
 
 	if err := client.Ping(ctx, nil); err != nil {
-			return nil, err
+		return nil, err
 	}
 
 	if ctx.Err() == context.DeadlineExceeded {
-			return nil, errors.New("context deadline exceeded")
+		return nil, errors.New("context deadline exceeded")
 	}
 
-	log.Println(fmt.Sprintf("Connected to MongoDB! %v", client))
+	log.Println(fmt.Sprintf("Connected to MongoDB!"))
 
 	return client, nil
 }
