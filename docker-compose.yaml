@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  app:
+    image: tusk
+    build:
+      context: .
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 512M

@@ -21,6 +21,8 @@ Após a construção da imagem, execute o seguinte comando para iniciar o contê
 docker run -p 3000:3000 tusk-app
 ```
 
+ou ```docker-compose up``` para subir e ```docker-compose down``` para baixar
+
 Este comando inicia o contêiner e mapeia a porta 3000 do host para a porta 3000 do contêiner.
 
 Agora, você deve ser capaz de acessar o aplicativo no seu navegador em http://localhost:3000.
