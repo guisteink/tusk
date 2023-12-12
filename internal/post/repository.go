@@ -91,6 +91,9 @@ func (r *Repository) Update(id primitive.ObjectID, updatedPost internal.Post, ct
 
 	_, err := collection.UpdateOne(ctx, primitive.M{"_id": id}, update)
 	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return internal.Post{}, ErrPostNotFound
+		}
 		return internal.Post{}, fmt.Errorf("failed to update post: %v", err)
 	}
 
