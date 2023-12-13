@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 
 	"github.com/guisteink/tusk/config"
@@ -31,6 +32,9 @@ func main() {
 	http.Configure(conn)
 
 	g := gin.Default()
+
+	g.Use(cors.Default())
+
 	http.SetRoutes(g)
 
 	g.Run(":" + port)
