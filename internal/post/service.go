@@ -88,13 +88,13 @@ func (s Service) FindAll(ctx *gin.Context) ([]internal.Post, int, error) {
 	posts, err := s.Repository.Find(bson.M{}, ctx)
 	if err != nil {
 		if errors.Is(err, ErrPostNotFound) {
-			return []internal.Post{}, http.StatusNotFound, err
+			return []internal.Post{}, http.StatusOK, nil
 		}
-		return []internal.Post{}, http.StatusInternalServerError, err
+		return nil, http.StatusInternalServerError, err
 	}
 
 	if len(posts) == 0 {
-		return []internal.Post{}, http.StatusNotFound, ErrPostNotFound
+		return []internal.Post{}, http.StatusOK, nil
 	}
 
 	return posts, http.StatusOK, nil

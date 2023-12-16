@@ -61,6 +61,7 @@ func (r *Repository) Find(filter interface{}, ctx *gin.Context) ([]internal.Post
 
 	return posts, nil
 }
+
 func (r *Repository) Delete(id primitive.ObjectID, ctx *gin.Context) (internal.Post, error) {
 	collection := r.Conn.Database("tusk").Collection("posts")
 
