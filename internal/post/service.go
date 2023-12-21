@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"unicode/utf8"
 
-	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 
@@ -28,7 +27,7 @@ type CreateResponse struct {
 	Post internal.Post `json:"post"`
 }
 
-func (p Service) Create(post internal.Post, ctx *gin.Context) (CreateResponse, int, error) {
+func (p Service) Create(post internal.Post) (CreateResponse, int, error) {
 	if post.Body == "" {
 		return CreateResponse{}, http.StatusBadRequest, ErrPostBodyEmpty
 	}
@@ -37,7 +36,7 @@ func (p Service) Create(post internal.Post, ctx *gin.Context) (CreateResponse, i
 		return CreateResponse{}, http.StatusBadRequest, ErrPostBodyExceedsLimit
 	}
 
-	result, err := p.Repository.Insert(post, ctx)
+	result, err := p.Repository.Insert(post)
 	if err != nil {
 		if errors.Is(err, ErrPostNotFound) {
 			return CreateResponse{}, http.StatusNotFound, err
@@ -58,7 +57,7 @@ func (p Service) Create(post internal.Post, ctx *gin.Context) (CreateResponse, i
 	return response, http.StatusCreated, nil
 }
 
-func (s Service) FindByID(param string, ctx *gin.Context) (internal.Post, int, error) {
+func (s Service) FindByID(param string) (internal.Post, int, error) {
 	if param == "" {
 		return internal.Post{}, http.StatusBadRequest, ErrIdEmpty
 	}
@@ -68,7 +67,7 @@ func (s Service) FindByID(param string, ctx *gin.Context) (internal.Post, int, e
 		return internal.Post{}, http.StatusBadRequest, fmt.Errorf("invalid id format: %v", err)
 	}
 
-	posts, err := s.Repository.Find(primitive.M{"_id": id}, ctx)
+	posts, err := s.Repository.Find(primitive.M{"_id": id})
 	if err != nil {
 		if errors.Is(err, ErrPostNotFound) {
 			return internal.Post{}, http.StatusNotFound, err
@@ -84,8 +83,8 @@ func (s Service) FindByID(param string, ctx *gin.Context) (internal.Post, int, e
 	return foundPost, http.StatusOK, nil
 }
 
-func (s Service) FindAll(ctx *gin.Context) ([]internal.Post, int, error) {
-	posts, err := s.Repository.Find(bson.M{}, ctx)
+func (s Service) FindAll() ([]internal.Post, int, error) {
+	posts, err := s.Repository.Find(bson.M{})
 	if err != nil {
 		if errors.Is(err, ErrPostNotFound) {
 			return []internal.Post{}, http.StatusOK, nil
@@ -100,7 +99,7 @@ func (s Service) FindAll(ctx *gin.Context) ([]internal.Post, int, error) {
 	return posts, http.StatusOK, nil
 }
 
-func (s Service) DeleteByID(param string, ctx *gin.Context) (CreateResponse, int, error) {
+func (s Service) DeleteByID(param string) (CreateResponse, int, error) {
 	if param == "" {
 		return CreateResponse{}, http.StatusBadRequest, ErrIdEmpty
 	}
@@ -110,7 +109,7 @@ func (s Service) DeleteByID(param string, ctx *gin.Context) (CreateResponse, int
 		return CreateResponse{}, http.StatusBadRequest, fmt.Errorf("invalid id format: %v", err)
 	}
 
-	deletedPost, err := s.Repository.Delete(id, ctx)
+	deletedPost, err := s.Repository.Delete(id)
 	if err != nil {
 		if errors.Is(err, ErrPostNotFound) {
 			return CreateResponse{}, http.StatusNotFound, err
@@ -122,7 +121,7 @@ func (s Service) DeleteByID(param string, ctx *gin.Context) (CreateResponse, int
 	return response, http.StatusOK, nil
 }
 
-func (s Service) UpdateByID(param string, updatedPost internal.Post, ctx *gin.Context) (CreateResponse, int, error) {
+func (s Service) UpdateByID(id string, updatedPost internal.Post) (CreateResponse, int, error) {
 	if updatedPost.Body == "" {
 		return CreateResponse{}, http.StatusBadRequest, ErrPostBodyEmpty
 	}
@@ -131,16 +130,17 @@ func (s Service) UpdateByID(param string, updatedPost internal.Post, ctx *gin.Co
 		return CreateResponse{}, http.StatusBadRequest, ErrPostBodyExceedsLimit
 	}
 
-	if param == "" {
+	if id == "" {
 		return CreateResponse{}, http.StatusBadRequest, ErrIdEmpty
 	}
 
-	id, err := primitive.ObjectIDFromHex(param)
+	// Convertendo ObjectID para string
+	oid, err := primitive.ObjectIDFromHex(id)
 	if err != nil {
 		return CreateResponse{}, http.StatusBadRequest, fmt.Errorf("invalid id format: %v", err)
 	}
 
-	result, err := s.Repository.Update(id, updatedPost, ctx)
+	result, err := s.Repository.Update(oid, updatedPost)
 	if err != nil {
 		if errors.Is(err, ErrPostNotFound) {
 			return CreateResponse{}, http.StatusNotFound, err

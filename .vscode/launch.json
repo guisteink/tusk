@@ -1,15 +1,18 @@
 {
   "version": "0.2.0",
   "configurations": [
+
     {
       "name": "Launch Package",
       "type": "go",
       "request": "launch",
       "mode": "auto",
-      "program": "${workspaceFolder}/cmd/app",
+      "program": "${workspaceFolder}/cmd",
       "env": {
         "DATABASE_URI": "mongodb+srv://admin:qwe123@4uth.9fbuvlh.mongodb.net/tusk",
-        "PORT": "3000"
+        "PORT": 3000,
+        "PROCESS_WORKER_INTERVAL_IN_SECONDS": 5,
+        "OPENAI_APIKEY": "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"
       },
       "args": ["-gcflags", "all=-N -l"]
     }
