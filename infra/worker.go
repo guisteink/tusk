@@ -3,6 +3,7 @@ package infra
 import (
 	"context"
 	"encoding/json"
+	"log"
 	"strconv"
 	"time"
 
@@ -13,12 +14,10 @@ import (
 	"github.com/guisteink/tusk/internal/post"
 )
 
-var (
-	service              post.Service
-	globalQueue          *Queue
-	logger               = logrus.New()
-	openAIClientInstance *OpenAIClient
-)
+var service post.Service
+var globalQueue *Queue
+var logger = logrus.New()
+var openAIClientInstance *OpenAIClient
 
 func initLogger() {
 	logger.SetFormatter(&logrus.JSONFormatter{})
@@ -37,8 +36,7 @@ func Configure(queueInstance *Queue, openAIClient *OpenAIClient, svc post.Servic
 }
 
 func processQueueWorker(processWorkerIntervalInSeconds int) {
-	const startingProcessWorkerMsg = "Starting process worker"
-	logger.Infof(startingProcessWorkerMsg)
+	logger.Infof("Starting process worker")
 
 	for {
 		data, err := globalQueue.Dequeue()
@@ -56,7 +54,7 @@ func processQueueWorker(processWorkerIntervalInSeconds int) {
 
 		response, err := openAIClientInstance.CreateCompletion(context.Background(), deserializedPost.Body)
 		if err != nil {
-			logger.Infof("OpenAI error: %v", err)
+			logger.Infof("openai error: %v", err)
 			continue
 		}
 
@@ -84,7 +82,7 @@ func initProcessWorker() {
 	processWorkerIntervalInSecondsStr := config.PROCESS_WORKER_INTERVAL_IN_SECONDS
 	processWorkerIntervalInSeconds, err := strconv.Atoi(processWorkerIntervalInSecondsStr)
 	if err != nil {
-		logger.Fatalf("Failed to convert process worker interval to int: %v", err)
+		log.Fatal(" Converting error strconv.Atoi:", err)
 		return
 	}
 

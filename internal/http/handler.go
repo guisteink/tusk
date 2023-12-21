@@ -6,21 +6,35 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sashabaranov/go-openai"
 	"github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 
-	"github.com/guisteink/tusk/config"
 	"github.com/guisteink/tusk/infra"
 	"github.com/guisteink/tusk/internal"
 	"github.com/guisteink/tusk/internal/post"
 )
 
-var (
-	globalQueue               infra.Queue
-	openAIClientInstance      infra.OpenAIClient
-	service                   post.Service
-	logger                    = logrus.New()
+type Queue interface {
+	Enqueue(data []byte) error
+	Dequeue() ([]byte, error)
+	IsEmpty() bool
+	GetSize() int
+	Peek() ([]byte, error)
+	Clear() error
+}
+
+type OpenAIClient struct {
+	client *openai.Client
+}
+
+var globalQueue Queue
+var openAIClientInstance OpenAIClient
+var service post.Service
+var logger = logrus.New()
+
+const (
 	statusBadRequest          = http.StatusBadRequest
 	statusNotFound            = http.StatusNotFound
 	statusInternalServerError = http.StatusInternalServerError
@@ -31,8 +45,8 @@ func initLogger() {
 }
 
 func Configure(conn *mongo.Client) {
-	queueInstance := &infra.Queue{}
-	openAIClient := infra.NewOpenAIClient(config.OPENAI_APIKEY)
+	var queueInstance = &infra.Queue{}
+	var openAIClient = infra.NewOpenAIClient("your-openai-api-key")
 
 	initLogger()
 	service = post.Service{
@@ -40,7 +54,7 @@ func Configure(conn *mongo.Client) {
 			Conn: conn,
 		},
 	}
-	globalQueue = *queueInstance
+	globalQueue = queueInstance
 	infra.Configure(queueInstance, openAIClient, service)
 }
 
@@ -73,11 +87,11 @@ func HandleNewPost(ctx *gin.Context) {
 	var post internal.Post
 
 	if err := ctx.BindJSON(&post); err != nil {
-		handleErrors(ctx, errors.New("failed to bind JSON for new post"))
+		handleErrors(ctx, err)
 		return
 	}
 
-	logger.Infof("Creating post: %+v", post)
+	logger.Infof("Creating post: %+v\n", post)
 	response, statusCode, err := service.Create(post)
 	if err != nil {
 		handleErrors(ctx, err)
@@ -96,7 +110,7 @@ func HandleNewPost(ctx *gin.Context) {
 		return
 	}
 
-	logger.Infof("Post created successfully: %+v", response.Post)
+	logger.Infof("Post created successfully: %+v\n", response.Post)
 	ctx.JSON(statusCode, response)
 }
 
@@ -107,14 +121,14 @@ func handleListPostById(ctx *gin.Context) {
 		return
 	}
 
-	logger.Infof("Searching for post with id: %s", param)
+	logger.Infof("Searching for post with id: %s\n", param)
 	response, statusCode, err := service.FindByID(param)
 	if err != nil {
 		handleErrors(ctx, err)
 		return
 	}
 
-	logger.Infof("Found post with id %s: %+v", param, response)
+	logger.Infof("Found post with id %s: %+v\n", param, response)
 	ctx.JSON(statusCode, response)
 }
 
@@ -126,7 +140,7 @@ func handleListPosts(ctx *gin.Context) {
 		return
 	}
 
-	logger.Infof("Founded posts: %+v", response)
+	logger.Infof("Founded posts: %+v\n", response)
 	ctx.JSON(statusCode, response)
 }
 
@@ -137,14 +151,14 @@ func handleDeletePost(ctx *gin.Context) {
 		return
 	}
 
-	logger.Infof("Trying to delete post with id: %s", param)
+	logger.Infof("Trying to delete post with id: %s\n", param)
 	response, statusCode, err := service.DeleteByID(param)
 	if err != nil {
 		handleErrors(ctx, err)
 		return
 	}
 
-	logger.Infof("Post with id %s successfully deleted: %+v", param, response)
+	logger.Infof("Post with id %s successfully deleted: %+v\n", param, response)
 	ctx.JSON(statusCode, response)
 }
 
@@ -182,6 +196,6 @@ func handleUpdatePost(ctx *gin.Context) {
 		return
 	}
 
-	logger.Infof("Post updated successfully: %+v", response.Post)
+	logger.Infof("Post updated successfully: %+v\n", response.Post)
 	ctx.JSON(statusCode, response)
 }
