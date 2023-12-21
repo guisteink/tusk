@@ -49,7 +49,21 @@ func processQueueWorker(processWorkerIntervalInSeconds int) {
 
 		response, err := openAIClientInstance.CreateCompletion(context.Background(), deserializedPost.Body)
 		if err != nil {
-			logger.Infof("openai error: %v", err)
+			logger.Errorf("OpenAI error: %v", err)
+
+			// Handle the case where OpenAI processing fails
+			updatedPost := internal.Post{
+				Body:      deserializedPost.Body,
+				Title:     deserializedPost.Title,
+				Username:  deserializedPost.Username,
+				CreatedAt: deserializedPost.CreatedAt,
+				Tags:      []string{"openai processing fail"},
+			}
+
+			_, _, err = service.UpdateByID(deserializedPost.ID.Hex(), updatedPost)
+			if err != nil {
+				logger.Infof("Error updating post: %v", err)
+			}
 			continue
 		}
 

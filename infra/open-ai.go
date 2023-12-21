@@ -28,7 +28,8 @@ func NewOpenAIClient(apiKey string) *OpenAIClient {
 
 func buildChatCompletionRequest(PostBody string) openai.ChatCompletionRequest {
 	return openai.ChatCompletionRequest{
-		Model: openai.GPT3Dot5Turbo,
+		Model:       openai.GPT3Dot5Turbo,
+		Temperature: 0,
 		Messages: []openai.ChatCompletionMessage{
 			{
 				Role:    openai.ChatMessageRoleSystem,
