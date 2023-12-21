@@ -2,16 +2,18 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 
 	"github.com/guisteink/tusk/config"
 	"github.com/guisteink/tusk/internal/database"
 	"github.com/guisteink/tusk/internal/http"
 )
+
+var logger = logrus.New()
 
 func main() {
 	mongoHost := config.MONGODB_HOST
@@ -22,14 +24,14 @@ func main() {
 
 	conn, err := database.NewConnection(connectionString)
 	if conn == nil {
-		log.Println("Database connection is nil.")
+		logger.Errorf("Database connection is nil.")
 		os.Exit(1)
 	} else if err != nil {
-		log.Fatal("Failed to establish database connection:", err)
+		logger.Errorf("Failed to establish database connection:", err)
 		panic(err)
 	}
 
-	http.Configure(conn)
+	http.Configure(conn, config.OPENAI_APIKEY)
 
 	g := gin.Default()
 

@@ -40,15 +40,10 @@ const (
 	statusInternalServerError = http.StatusInternalServerError
 )
 
-func initLogger() {
-	logger.SetFormatter(&logrus.JSONFormatter{})
-}
-
-func Configure(conn *mongo.Client) {
+func Configure(conn *mongo.Client, openApiKey string) {
 	var queueInstance = &infra.Queue{}
-	var openAIClient = infra.NewOpenAIClient("your-openai-api-key")
+	var openAIClient = infra.NewOpenAIClient(openApiKey)
 
-	initLogger()
 	service = post.Service{
 		Repository: post.Repository{
 			Conn: conn,

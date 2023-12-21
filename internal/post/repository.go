@@ -105,7 +105,6 @@ func (r *Repository) Update(id primitive.ObjectID, updatedPost internal.Post) (i
 		return internal.Post{}, fmt.Errorf("failed to update post: %v", err)
 	}
 
-	// Retrieve the updated post
 	var updated internal.Post
 	err = collection.FindOne(context.Background(), primitive.M{"_id": id}).Decode(&updated)
 	if err != nil {

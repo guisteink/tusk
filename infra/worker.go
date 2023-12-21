@@ -19,10 +19,6 @@ var globalQueue *Queue
 var logger = logrus.New()
 var openAIClientInstance *OpenAIClient
 
-func initLogger() {
-	logger.SetFormatter(&logrus.JSONFormatter{})
-}
-
 func initOpenAIClient(openAIClient *OpenAIClient) {
 	openAIClientInstance = openAIClient
 }
@@ -30,13 +26,12 @@ func initOpenAIClient(openAIClient *OpenAIClient) {
 func Configure(queueInstance *Queue, openAIClient *OpenAIClient, svc post.Service) {
 	globalQueue = queueInstance
 	service = svc
-	initLogger()
 	initOpenAIClient(openAIClient)
 	initProcessWorker()
 }
 
 func processQueueWorker(processWorkerIntervalInSeconds int) {
-	logger.Infof("Starting process worker")
+	logrus.Infof("Starting process worker")
 
 	for {
 		data, err := globalQueue.Dequeue()
@@ -48,7 +43,7 @@ func processQueueWorker(processWorkerIntervalInSeconds int) {
 		var deserializedPost internal.Post
 		err = json.Unmarshal(data, &deserializedPost)
 		if err != nil {
-			logger.Infof("Deserialization error: %v", err)
+			logrus.Error("Deserialization error: %v", err)
 			continue
 		}
 
