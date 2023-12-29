@@ -90,13 +90,14 @@ func (r *Repository) Update(id primitive.ObjectID, updatedPost internal.Post) (i
 
 	update := bson.M{
 		"$set": bson.M{
-			"username":  updatedPost.Username,
-			"title":     updatedPost.Title,
-			"body":      updatedPost.Body,
-			"createdAt": updatedPost.CreatedAt,
-			"tags":      updatedPost.Tags,
-			"tips":      updatedPost.Tips,
-			"revision":  updatedPost.Revision,
+			"username":     updatedPost.Username,
+			"title":        updatedPost.Title,
+			"body":         updatedPost.Body,
+			"createdAt":    updatedPost.CreatedAt,
+			"tags":         updatedPost.Tags,
+			"tips":         updatedPost.Tips,
+			"revision":     updatedPost.Revision,
+			"writingScore": updatedPost.WritingScore,
 		},
 	}
 

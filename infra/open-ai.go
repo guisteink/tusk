@@ -11,9 +11,10 @@ import (
 )
 
 type OpenAIResponse struct {
-	Revision string   `json:"revision"`
-	Tips     string   `json:"tips"`
-	Tags     []string `json:"tags"`
+	Revision     string   `json:"revision"`
+	Tips         string   `json:"tips"`
+	Tags         []string `json:"tags"`
+	WritingScore float64  `json:"writingScore"`
 }
 
 type OpenAIClient struct {
@@ -37,7 +38,7 @@ func buildChatCompletionRequest(PostBody string) openai.ChatCompletionRequest {
 			},
 			{
 				Role:    openai.ChatMessageRoleSystem,
-				Content: "Coloque a resposta numa estrutura JSON valida, com revision, tips e tags[]",
+				Content: "Coloque a resposta numa estrutura JSON valida, com revision, tips, writingScore(0.00~10.00) e tags[]",
 			},
 		},
 	}

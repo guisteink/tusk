@@ -68,13 +68,14 @@ func processQueueWorker(processWorkerIntervalInSeconds int) {
 		}
 
 		updatedPost := internal.Post{
-			Body:      deserializedPost.Body,
-			Title:     deserializedPost.Title,
-			Username:  deserializedPost.Username,
-			CreatedAt: deserializedPost.CreatedAt,
-			Revision:  response.Revision,
-			Tips:      response.Tips,
-			Tags:      response.Tags,
+			Body:         deserializedPost.Body,
+			Title:        deserializedPost.Title,
+			Username:     deserializedPost.Username,
+			CreatedAt:    deserializedPost.CreatedAt,
+			Revision:     response.Revision,
+			Tips:         response.Tips,
+			WritingScore: response.WritingScore,
+			Tags:         response.Tags,
 		}
 
 		_, _, err = service.UpdateByID(deserializedPost.ID.Hex(), updatedPost)
