@@ -8,6 +8,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 
 	"github.com/guisteink/tusk/internal"
 )
@@ -116,4 +117,49 @@ func (r *Repository) Update(id primitive.ObjectID, updatedPost internal.Post) (i
 	}
 
 	return updated, nil
+}
+
+func (r *Repository) FindWithPagination(startIndex, endIndex int) ([]internal.Post, int, error) {
+	collection := r.Conn.Database("tusk").Collection("posts")
+	ctx := context.Background()
+
+	options := options.Find().SetSkip(int64(startIndex)).SetLimit(int64(endIndex - startIndex))
+
+	var posts []internal.Post
+	cur, err := collection.Find(ctx, bson.M{}, options)
+	if err != nil {
+		return nil, 0, fmt.Errorf("failed to find posts: %v", err)
+	}
+	defer cur.Close(ctx)
+
+	for cur.Next(ctx) {
+		var post internal.Post
+		if err := cur.Decode(&post); err != nil {
+			return nil, 0, fmt.Errorf("failed to decode post: %v", err)
+		}
+		posts = append(posts, post)
+	}
+
+	if err := cur.Err(); err != nil {
+		return nil, 0, fmt.Errorf("cursor error: %v", err)
+	}
+
+	totalItems, err := r.CountTotal()
+	if err != nil {
+		return nil, 0, err
+	}
+
+	return posts, totalItems, nil
+}
+
+func (r *Repository) CountTotal() (int, error) {
+	collection := r.Conn.Database("tusk").Collection("posts")
+	ctx := context.Background()
+
+	count, err := collection.CountDocuments(ctx, bson.M{})
+	if err != nil {
+		return 0, fmt.Errorf("failed to count total posts: %v", err)
+	}
+
+	return int(count), nil
 }

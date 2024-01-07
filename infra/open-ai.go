@@ -64,7 +64,7 @@ func (o *OpenAIClient) CreateCompletion(ctx context.Context, PostBody string) (O
 		return OpenAIResponse{}, fmt.Errorf("Parsing content error: %v", err)
 	}
 
-	logger.Infof("Successfully by Openai")
+	logger.Infof("Successfully revisioned by Openai")
 
 	return responseStruct, nil
 }

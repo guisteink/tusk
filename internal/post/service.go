@@ -159,3 +159,19 @@ func (s Service) UpdateByID(id string, updatedPost internal.Post) (CreateRespons
 	response := CreateResponse{Post: responsePost}
 	return response, http.StatusOK, nil
 }
+
+func (s Service) FindWithPagination(startIndex, endIndex int) ([]internal.Post, int, error) {
+	posts, totalItems, err := s.Repository.FindWithPagination(startIndex, endIndex)
+	if err != nil {
+		if errors.Is(err, ErrPostNotFound) {
+			return []internal.Post{}, 0, nil
+		}
+		return nil, 0, err
+	}
+
+	if len(posts) == 0 {
+		return []internal.Post{}, 0, nil
+	}
+
+	return posts, totalItems, nil
+}

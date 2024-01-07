@@ -3,7 +3,9 @@ package http
 import (
 	"encoding/json"
 	"errors"
+	"math"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 	"github.com/sashabaranov/go-openai"
@@ -126,17 +128,42 @@ func handleListPostById(ctx *gin.Context) {
 	logger.Infof("Found post with id %s: %+v\n", param, response)
 	ctx.JSON(statusCode, response)
 }
-
 func handleListPosts(ctx *gin.Context) {
-	logger.Info("Listing all posts")
-	response, statusCode, err := service.FindAll()
+	page, _ := strconv.Atoi(ctx.Query("page"))
+	pageSize, _ := strconv.Atoi(ctx.Query("pageSize"))
+
+	if page <= 0 {
+		page = 1
+	}
+
+	if pageSize <= 0 {
+		pageSize = 10
+	}
+
+	startIndex := (page - 1) * pageSize
+	endIndex := startIndex + pageSize
+
+	logger.Info("Listing posts with pagination")
+	posts, totalItems, err := service.FindWithPagination(startIndex, endIndex)
 	if err != nil {
 		handleErrors(ctx, err)
 		return
 	}
 
+	totalPages := int(math.Ceil(float64(totalItems) / float64(pageSize)))
+
+	response := gin.H{
+		"pagination": gin.H{
+			"totalItems":  totalItems,
+			"totalPages":  totalPages,
+			"currentPage": page,
+			"pageSize":    pageSize,
+		},
+		"data": posts,
+	}
+
 	logger.Infof("Founded posts: %+v\n", response)
-	ctx.JSON(statusCode, response)
+	ctx.JSON(http.StatusOK, response)
 }
 
 func handleDeletePost(ctx *gin.Context) {
